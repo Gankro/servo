@@ -15,7 +15,7 @@ use script_traits::UntrustedNodeAddress;
 use servo_msg::constellation_msg::ConstellationChan;
 use servo_net::local_image_cache::LocalImageCache;
 use servo_util::geometry::Au;
-use sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex};
 use std::mem;
 use style::Stylist;
 use url::Url;
@@ -26,7 +26,7 @@ struct LocalLayoutContext {
     style_sharing_candidate_cache: StyleSharingCandidateCache,
 }
 
-local_data_key!(local_context_key: *mut LocalLayoutContext)
+thread_local!(static local_context_key: Cell<*mut LocalLayoutContext> = Cell::new(ptr::null()))
 
 fn create_or_get_local_context(shared_layout_context: &SharedLayoutContext) -> *mut LocalLayoutContext {
     let maybe_context = local_context_key.get();

@@ -14,7 +14,7 @@ use gfx::font::{ShapingOptions};
 use gfx::font_context::FontContext;
 use gfx::text::glyph::CharIndex;
 use gfx::text::text_run::TextRun;
-use gfx::text::util::{mod, CompressWhitespaceNewline, CompressNone};
+use gfx::text::util::{mod, CompressionMode};
 use servo_util::dlist;
 use servo_util::geometry::Au;
 use servo_util::logical_geometry::{LogicalSize, WritingMode};
@@ -25,7 +25,7 @@ use std::mem;
 use style::ComputedValues;
 use style::computed_values::{line_height, text_orientation, text_transform, white_space};
 use style::style_structs::Font as FontStyle;
-use sync::Arc;
+use std::sync::Arc;
 
 /// A stack-allocated object for scanning an inline flow into `TextRun`-containing `TextFragment`s.
 pub struct TextRunScanner {
@@ -114,8 +114,8 @@ impl TextRunScanner {
                 let inherited_text_style = in_fragment.style().get_inheritedtext();
                 fontgroup = font_context.get_layout_font_group_for_style(font_style);
                 compression = match in_fragment.white_space() {
-                    white_space::normal | white_space::nowrap => CompressWhitespaceNewline,
-                    white_space::pre => CompressNone,
+                    white_space::normal | white_space::nowrap => CompressionMode::CompressWhitespaceNewline,
+                    white_space::pre => CompressionMode::CompressNone,
                 };
                 text_transform = inherited_text_style.text_transform;
                 letter_spacing = inherited_text_style.letter_spacing;

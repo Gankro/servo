@@ -55,7 +55,7 @@ use std::sync::atomic::Relaxed;
 use style::computed_values::{caption_side, display, empty_cells, float, list_style_position};
 use style::computed_values::{position};
 use style::{mod, ComputedValues};
-use sync::Arc;
+use std::sync::Arc;
 use url::Url;
 
 /// The results of flow construction for a DOM node.

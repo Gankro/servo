@@ -45,7 +45,7 @@ type Generation = uint;
 /// Since a work-stealing queue is used for styling, sometimes, the bloom filter
 /// will no longer be the for the parent of the node we're currently on. When
 /// this happens, the task local bloom filter will be thrown away and rebuilt.
-local_data_key!(style_bloom: (Box<BloomFilter>, UnsafeLayoutNode, Generation))
+thread_local!(static style_bloom: RefCell<Option<(Box<BloomFilter>, UnsafeLayoutNode, Generation)>> = RefCell::new(None))
 
 /// Returns the task local bloom filter.
 ///

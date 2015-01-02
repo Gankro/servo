@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::io::File;
 use std::sync::atomic::{AtomicUint, SeqCst, INIT_ATOMIC_UINT};
 
-local_data_key!(state_key: RefCell<State>)
+thread_local!(static state_key: RefCell<Option<State>> = RefCell::new(None))
 
 static mut DEBUG_ID_COUNTER: AtomicUint = INIT_ATOMIC_UINT;
 

@@ -15,7 +15,7 @@ use servo_msg::compositor_msg::{PaintState, ReadyState};
 use servo_msg::constellation_msg::{Key, KeyState, KeyModifiers, LoadData};
 use servo_util::cursor::Cursor;
 use servo_util::geometry::ScreenPx;
-use std::fmt::{FormatError, Formatter, Show};
+use std::fmt::{Error, Formatter, Show};
 use std::rc::Rc;
 
 pub enum MouseWindowEvent {
@@ -68,7 +68,7 @@ pub enum WindowEvent {
 }
 
 impl Show for WindowEvent {
-    fn fmt(&self, f: &mut Formatter) -> Result<(),FormatError> {
+    fn fmt(&self, f: &mut Formatter) -> Result<(),Error> {
         match *self {
             WindowEvent::Idle => write!(f, "Idle"),
             WindowEvent::Refresh => write!(f, "Refresh"),

@@ -28,15 +28,15 @@ use gfx::display_list::{BorderRadii, BoxShadowDisplayItem, ClippingRegion};
 use gfx::display_list::{DisplayItem, DisplayList, DisplayItemMetadata};
 use gfx::display_list::{GradientDisplayItem};
 use gfx::display_list::{GradientStop, ImageDisplayItem, LineDisplayItem};
-use gfx::display_list::{SidewaysLeft};
-use gfx::display_list::{SidewaysRight, SolidColorDisplayItem};
-use gfx::display_list::{StackingContext, TextDisplayItem, Upright};
+use gfx::display_list::TextOrientation;
+use gfx::display_list::{SolidColorDisplayItem};
+use gfx::display_list::{StackingContext, TextDisplayItem};
 use gfx::paint_task::PaintLayer;
-use servo_msg::compositor_msg::{FixedPosition, Scrollable};
+use servo_msg::compositor_msg::ScrollPolicy;
 use servo_msg::constellation_msg::Msg as ConstellationMsg;
 use servo_msg::constellation_msg::ConstellationChan;
 use servo_net::image::holder::ImageHolder;
-use servo_util::cursor::{DefaultCursor, TextCursor, VerticalTextCursor};
+use servo_util::cursor::Cursor;
 use servo_util::geometry::{mod, Au};
 use servo_util::logical_geometry::{LogicalPoint, LogicalRect, LogicalSize};
 use servo_util::opts;
@@ -48,7 +48,7 @@ use style::computed_values::{background_attachment, background_repeat, border_st
 use style::computed_values::{position, visibility};
 use style::style_structs::Border;
 use style::{ComputedValues, RGBA};
-use sync::Arc;
+use std::sync::Arc;
 use url::Url;
 
 /// The results of display list building for a single flow.
@@ -916,12 +916,12 @@ impl FragmentDisplayListBuilding for Fragment {
         // Determine the orientation and cursor to use.
         let (orientation, cursor) = if self.style.writing_mode.is_vertical() {
             if self.style.writing_mode.is_sideways_left() {
-                (SidewaysLeft, VerticalTextCursor)
+                (TextOrientation::SidewaysLeft, Cursor::VerticalTextCursor)
             } else {
-                (SidewaysRight, VerticalTextCursor)
+                (TextOrientation::SidewaysRight, Cursor::VerticalTextCursor)
             }
         } else {
-            (Upright, TextCursor)
+            (TextOrientation::Upright, Cursor::TextCursor)
         };
 
         // Compute location of the baseline.
@@ -1083,9 +1083,9 @@ impl BlockFlowDisplayListBuilding for BlockFlow {
 
         // If we got here, then we need a new layer.
         let scroll_policy = if self.is_fixed() {
-            FixedPosition
+            ScrollPolicy::FixedPosition
         } else {
-            Scrollable
+            ScrollPolicy::Scrollable
         };
 
         let transparent = color::rgba(1.0, 1.0, 1.0, 0.0);
@@ -1163,7 +1163,7 @@ impl InlineFlowDisplayListBuilding for InlineFlow {
     fn build_display_list_for_inline(&mut self, layout_context: &LayoutContext) {
         // TODO(#228): Once we form lines and have their cached bounds, we can be smarter and
         // not recurse on a line if nothing in it can intersect the dirty region.
-        debug!("Flow: building display list for {:u} inline fragments", self.fragments.len());
+        debug!("Flow: building display list for {} inline fragments", self.fragments.len());
 
         let mut display_list = box DisplayList::new();
         for fragment in self.fragments.fragments.iter_mut() {

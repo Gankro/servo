@@ -137,6 +137,7 @@ pub trait TLayoutNode {
 
 /// A wrapper so that layout can access only the methods that it should have access to. Layout must
 /// only ever see these and must never see instances of `JS`.
+#[deriving(Copy)]
 pub struct LayoutNode<'a> {
     /// The wrapped node.
     node: JS<Node>,
@@ -476,6 +477,7 @@ impl<'a> Iterator<LayoutNode<'a>> for LayoutTreeIterator<'a> {
 }
 
 /// A wrapper around elements that ensures layout can only ever access safe properties.
+#[deriving(Copy)]
 pub struct LayoutElement<'le> {
     element: &'le Element,
 }

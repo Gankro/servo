@@ -15,8 +15,10 @@ use script_traits::UntrustedNodeAddress;
 use servo_msg::constellation_msg::ConstellationChan;
 use servo_net::local_image_cache::LocalImageCache;
 use servo_util::geometry::Au;
-use std::sync::{Arc, Mutex};
+use std::cell::Cell;
 use std::mem;
+use std::ptr;
+use std::sync::{Arc, Mutex};
 use style::Stylist;
 use url::Url;
 

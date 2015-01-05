@@ -631,10 +631,10 @@ impl<'le> TElementAttributes for LayoutElement<'le> {
 
 fn get_content(content_list: &content::T) -> String {
     match *content_list {
-        content::Content(ref value) => {
+        content::T::Content(ref value) => {
             let iter = &mut value.clone().into_iter().peekable();
             match iter.next() {
-                Some(content::StringContent(content)) => content,
+                Some(content::ContentItem::StringContent(content)) => content,
                 _ => "".into_string(),
             }
         }
@@ -716,9 +716,9 @@ impl<'ln> TLayoutNode for ThreadSafeLayoutNode<'ln> {
                     let pseudo_before_node = self.with_pseudo(PseudoElementType::Before(self.get_before_display()));
                     return Some(pseudo_before_node)
                 }
-                PseudoElementType::Before(display::inline) => {}
+                PseudoElementType::Before(display::T::inline) => {}
                 PseudoElementType::Before(_) => {
-                    let pseudo_before_node = self.with_pseudo(PseudoElementType::Before(display::inline));
+                    let pseudo_before_node = self.with_pseudo(PseudoElementType::Before(display::T::inline));
                     return Some(pseudo_before_node)
                 }
                 _ => {}
@@ -922,7 +922,7 @@ impl<'ln> ThreadSafeLayoutNode<'ln> {
             // If you implement other values for this property, you will almost certainly
             // want to update this check.
             match self.style().get_inheritedtext().white_space {
-                white_space::normal => true,
+                white_space::T::normal => true,
                 _ => false,
             }
         }

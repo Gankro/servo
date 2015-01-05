@@ -21,6 +21,8 @@ use servo_util::opts;
 use servo_util::tid::tid;
 use style::TNode;
 
+use std::cell::RefCell;
+
 /// Every time we do another layout, the old bloom filters are invalid. This is
 /// detected by ticking a generation number every layout.
 type Generation = uint;

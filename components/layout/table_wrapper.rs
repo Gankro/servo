@@ -55,7 +55,7 @@ impl TableWrapperFlow {
                                   -> TableWrapperFlow {
         let mut block_flow = BlockFlow::from_node_and_fragment(node, fragment);
         let table_layout = if block_flow.fragment().style().get_table().table_layout ==
-                              table_layout::fixed {
+                              table_layout::T::fixed {
             TableLayout::Fixed
         } else {
             TableLayout::Auto
@@ -72,7 +72,7 @@ impl TableWrapperFlow {
                      -> TableWrapperFlow {
         let mut block_flow = BlockFlow::from_node(constructor, node);
         let table_layout = if block_flow.fragment().style().get_table().table_layout ==
-                              table_layout::fixed {
+                              table_layout::T::fixed {
             TableLayout::Fixed
         } else {
             TableLayout::Auto
@@ -90,7 +90,7 @@ impl TableWrapperFlow {
                                         -> TableWrapperFlow {
         let mut block_flow = BlockFlow::float_from_node_and_fragment(node, fragment, float_kind);
         let table_layout = if block_flow.fragment().style().get_table().table_layout ==
-                              table_layout::fixed {
+                              table_layout::T::fixed {
             TableLayout::Fixed
         } else {
             TableLayout::Auto

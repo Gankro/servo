@@ -21,9 +21,9 @@ pub enum FloatKind {
 impl FloatKind {
     pub fn from_property(property: float::T) -> FloatKind {
         match property {
-            float::none => panic!("can't create a float type from an unfloated property"),
-            float::left => FloatKind::Left,
-            float::right => FloatKind::Right,
+            float::T::none => panic!("can't create a float type from an unfloated property"),
+            float::T::left => FloatKind::Left,
+            float::T::right => FloatKind::Right,
         }
     }
 }

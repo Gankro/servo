@@ -255,12 +255,12 @@ pub trait Flow: fmt::Show + ToString + Sync {
 
     /// The 'position' property of this flow.
     fn positioning(&self) -> position::T {
-        position::static_
+        position::T::static_
     }
 
     /// Return true if this flow has position 'fixed'.
     fn is_fixed(&self) -> bool {
-        self.positioning() == position::fixed
+        self.positioning() == position::T::fixed
     }
 
     fn is_positioned(&self) -> bool {
@@ -268,7 +268,7 @@ pub trait Flow: fmt::Show + ToString + Sync {
     }
 
     fn is_relatively_positioned(&self) -> bool {
-        self.positioning() == position::relative
+        self.positioning() == position::T::relative
     }
 
     /// Return true if this is the root of an absolute flow tree.
@@ -575,11 +575,11 @@ impl FlowFlags {
     #[inline]
     pub fn float_kind(&self) -> float::T {
         if self.contains(FLOATS_LEFT) {
-            float::left
+            float::T::left
         } else if self.contains(FLOATS_RIGHT) {
-            float::right
+            float::T::right
         } else {
-            float::none
+            float::T::none
         }
     }
 
@@ -658,8 +658,8 @@ pub struct DescendantIter<'a> {
     iter: MutItems<'a, FlowRef>,
 }
 
-impl<'a> Iterator<&'a mut Flow + 'a> for DescendantIter<'a> {
-    fn next(&mut self) -> Option<&'a mut Flow + 'a> {
+impl<'a> Iterator<&'a mut (Flow + 'a)> for DescendantIter<'a> {
+    fn next(&mut self) -> Option<&'a mut (Flow + 'a)> {
         self.iter.next().map(|flow| &mut **flow)
     }
 }
@@ -863,7 +863,7 @@ impl BaseFlow {
             Some(node) => {
                 let node_style = node.style();
                 match node_style.get_box().position {
-                    position::absolute | position::fixed => {
+                    position::T::absolute | position::T::fixed => {
                         flags.insert(IS_ABSOLUTELY_POSITIONED)
                     }
                     _ => {}
@@ -871,17 +871,17 @@ impl BaseFlow {
 
                 if force_nonfloated == ForceNonfloatedFlag::FloatIfNecessary {
                     match node_style.get_box().float {
-                        float::none => {}
-                        float::left => flags.insert(FLOATS_LEFT),
-                        float::right => flags.insert(FLOATS_RIGHT),
+                        float::T::none => {}
+                        float::T::left => flags.insert(FLOATS_LEFT),
+                        float::T::right => flags.insert(FLOATS_RIGHT),
                     }
                 }
 
                 match node_style.get_box().clear {
-                    clear::none => {}
-                    clear::left => flags.insert(CLEARS_LEFT),
-                    clear::right => flags.insert(CLEARS_RIGHT),
-                    clear::both => {
+                    clear::T::none => {}
+                    clear::T::left => flags.insert(CLEARS_LEFT),
+                    clear::T::right => flags.insert(CLEARS_RIGHT),
+                    clear::T::both => {
                         flags.insert(CLEARS_LEFT);
                         flags.insert(CLEARS_RIGHT);
                     }
@@ -962,7 +962,7 @@ impl BaseFlow {
     }
 }
 
-impl<'a> ImmutableFlowUtils for &'a Flow + 'a {
+impl<'a> ImmutableFlowUtils for &'a (Flow + 'a) {
     /// Returns true if this flow is a block flow.
     fn is_block_like(self) -> bool {
         match self.class() {
@@ -1064,7 +1064,7 @@ impl<'a> ImmutableFlowUtils for &'a Flow + 'a {
                 let fragment =
                     Fragment::new_anonymous_from_specific_info(node,
                                                                SpecificFragmentInfo::TableCell);
-                let hide = node.style().get_inheritedtable().empty_cells == empty_cells::hide;
+                let hide = node.style().get_inheritedtable().empty_cells == empty_cells::T::hide;
                 box TableCellFlow::from_node_fragment_and_visibility_flag(node, fragment, !hide) as
                     Box<Flow>
             },
@@ -1138,7 +1138,7 @@ impl<'a> ImmutableFlowUtils for &'a Flow + 'a {
     }
 }
 
-impl<'a> MutableFlowUtils for &'a mut Flow + 'a {
+impl<'a> MutableFlowUtils for &'a mut (Flow + 'a) {
     /// Traverses the tree in preorder.
     fn traverse_preorder<T:PreorderFlowTraversal>(self, traversal: &T) {
         if traversal.should_process(self) {

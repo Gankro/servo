@@ -22,6 +22,7 @@ use servo_util::tid::tid;
 use style::TNode;
 
 use std::cell::RefCell;
+use std::mem;
 
 /// Every time we do another layout, the old bloom filters are invalid. This is
 /// detected by ticking a generation number every layout.
@@ -47,7 +48,7 @@ type Generation = uint;
 /// Since a work-stealing queue is used for styling, sometimes, the bloom filter
 /// will no longer be the for the parent of the node we're currently on. When
 /// this happens, the task local bloom filter will be thrown away and rebuilt.
-thread_local!(static style_bloom: RefCell<Option<(Box<BloomFilter>, UnsafeLayoutNode, Generation)>> = RefCell::new(None))
+thread_local!(static STYLE_BLOOM: RefCell<Option<(Box<BloomFilter>, UnsafeLayoutNode, Generation)>> = RefCell::new(None))
 
 /// Returns the task local bloom filter.
 ///
@@ -55,43 +56,46 @@ thread_local!(static style_bloom: RefCell<Option<(Box<BloomFilter>, UnsafeLayout
 /// it will be thrown out and a new one will be made for you.
 fn take_task_local_bloom_filter(parent_node: Option<LayoutNode>, layout_context: &LayoutContext)
                                 -> Box<BloomFilter> {
-    match (parent_node, style_bloom.replace(None)) {
-        // Root node. Needs new bloom filter.
-        (None,     _  ) => {
-            debug!("[{}] No parent, but new bloom filter!", tid());
-            box BloomFilter::new()
-        }
-        // No bloom filter for this thread yet.
-        (Some(parent), None) => {
-            let mut bloom_filter = box BloomFilter::new();
-            insert_ancestors_into_bloom_filter(&mut bloom_filter, parent, layout_context);
-            bloom_filter
-        }
-        // Found cached bloom filter.
-        (Some(parent), Some((mut bloom_filter, old_node, old_generation))) => {
-            // Hey, the cached parent is our parent! We can reuse the bloom filter.
-            if old_node == layout_node_to_unsafe_layout_node(&parent) &&
-                old_generation == layout_context.shared.generation {
-                debug!("[{}] Parent matches (={}). Reusing bloom filter.", tid(), old_node.val0());
-                bloom_filter
-            } else {
-                // Oh no. the cached parent is stale. I guess we need a new one. Reuse the existing
-                // allocation to avoid malloc churn.
-                *bloom_filter = BloomFilter::new();
+    STYLE_BLOOM.with(|style_bloom| {
+        match (parent_node, *style_bloom.borrow()) {
+            // Root node. Needs new bloom filter.
+            (None,     _  ) => {
+                debug!("[{}] No parent, but new bloom filter!", tid());
+                box BloomFilter::new()
+            }
+            // No bloom filter for this thread yet.
+            (Some(parent), None) => {
+                let mut bloom_filter = box BloomFilter::new();
                 insert_ancestors_into_bloom_filter(&mut bloom_filter, parent, layout_context);
                 bloom_filter
             }
-        },
-    }
+            // Found cached bloom filter.
+            (Some(parent), Some((mut bloom_filter, old_node, old_generation))) => {
+                // Hey, the cached parent is our parent! We can reuse the bloom filter.
+                if old_node == layout_node_to_unsafe_layout_node(&parent) &&
+                    old_generation == layout_context.shared.generation {
+                    debug!("[{}] Parent matches (={}). Reusing bloom filter.", tid(), old_node.val0());
+                    bloom_filter
+                } else {
+                    // Oh no. the cached parent is stale. I guess we need a new one. Reuse the existing
+                    // allocation to avoid malloc churn.
+                    *bloom_filter = BloomFilter::new();
+                    insert_ancestors_into_bloom_filter(&mut bloom_filter, parent, layout_context);
+                    bloom_filter
+                }
+            },
+        }
+    })
 }
 
 fn put_task_local_bloom_filter(bf: Box<BloomFilter>,
                                unsafe_node: &UnsafeLayoutNode,
                                layout_context: &LayoutContext) {
-    match style_bloom.replace(Some((bf, *unsafe_node, layout_context.shared.generation))) {
-        None => {},
-        Some(_) => panic!("Putting into a never-taken task-local bloom filter"),
-    }
+    STYLE_BLOOM.with(|style_bloom| {
+        assert!(style_bloom.borrow().is_none(),
+                "Putting into a never-taken task-local bloom filter");
+        *style_bloom.borrow_mut() = Some((bf, *unsafe_node, layout_context.shared.generation));
+    })
 }
 
 /// "Ancestors" in this context is inclusive of ourselves.
@@ -240,9 +244,10 @@ impl<'a> PostorderDomTraversal for ConstructFlows<'a> {
         let unsafe_layout_node = layout_node_to_unsafe_layout_node(&node);
 
         let (mut bf, old_node, old_generation) =
-            style_bloom
-            .replace(None)
-            .expect("The bloom filter should have been set by style recalc.");
+            STYLE_BLOOM.with(|style_bloom| {
+                mem::replace(&mut *style_bloom.borrow_mut(), None)
+                .expect("The bloom filter should have been set by style recalc.")
+            });
 
         assert_eq!(old_node, unsafe_layout_node);
         assert_eq!(old_generation, self.layout_context.shared.generation);

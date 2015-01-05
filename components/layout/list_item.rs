@@ -132,11 +132,11 @@ pub fn static_text_for_list_style_type(list_style_type: list_style_type::T)
     // separation.
     match list_style_type {
         list_style_type::T::none => None,
-        list_style_type::T::disc => Some("•\u00a0"),
-        list_style_type::T::circle => Some("◦\u00a0"),
-        list_style_type::T::square => Some("▪\u00a0"),
-        list_style_type::T::disclosure_open => Some("▾\u00a0"),
-        list_style_type::T::disclosure_closed => Some("‣\u00a0"),
+        list_style_type::T::disc => Some("•\u{a0}"),
+        list_style_type::T::circle => Some("◦\u{a0}"),
+        list_style_type::T::square => Some("▪\u{a0}"),
+        list_style_type::T::disclosure_open => Some("▾\u{a0}"),
+        list_style_type::T::disclosure_closed => Some("‣\u{a0}"),
     }
 }
 

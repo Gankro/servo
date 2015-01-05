@@ -102,7 +102,7 @@ dependencies = [
 [[package]]
 name = "core_foundation"
 version = "0.1.0"
-source = "git+https://github.com/servo/rust-core-foundation#d2dbe4fb6f6892521a37735cd7a97098d1b64808"
+source = "git+https://github.com/servo/rust-core-foundation#81db9ab15f67e16d7a3e9705a06cad65192014fd"
 
 [[package]]
 name = "core_graphics"
@@ -115,7 +115,7 @@ dependencies = [
 [[package]]
 name = "core_text"
 version = "0.1.0"
-source = "git+https://github.com/servo/rust-core-text#85784007b6fa1b8f9614059edcd0429b2bd69a11"
+source = "git+https://github.com/servo/rust-core-text#cb369a26a0eb4e83c2128ceb3c685a191113417a"
 dependencies = [
  "core_foundation 0.1.0 (git+https://github.com/servo/rust-core-foundation)",
  "core_graphics 0.1.0 (git+https://github.com/servo/rust-core-graphics)",
@@ -432,7 +432,7 @@ source = "git+https://github.com/bjz/gl-rs.git#b5e3f4f76c31bc1b459d5e4c10d879ffa
 [[package]]
 name = "layers"
 version = "0.1.0"
-source = "git+https://github.com/servo/rust-layers#3071ca188cd42b6631b49d499a4bb1d2ef9170b8"
+source = "git+https://github.com/servo/rust-layers#3699f30102e14324d5028a78a08a14f8ebd69407"
 dependencies = [
  "cgl 0.0.1 (git+https://github.com/servo/rust-cgl)",
  "core_foundation 0.1.0 (git+https://github.com/servo/rust-core-foundation)",

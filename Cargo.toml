@@ -12,5 +12,9 @@ codegen-units = 4
 [profile.release]
 opt-level = 3
 # Uncomment to profile on Linux:
-# debug = true
+debug = true
 # lto = false
+
+[replace]
+"https://github.com/servo/webrender#0.35.0" = { path = "../webrender/webrender" }
+"https://github.com/servo/webrender#webrender_traits:0.35.0" = { path = "../webrender/webrender_traits" }
